@@ -1583,24 +1583,36 @@ function pushToJsonBin(area){
     .catch(function(){});
 }
 
-// Merge remote area data into STATE without touching areas that have local actuals
-function mergeRemoteArea(area, remoteProcs){
-  if(areaHasLocalActuals(area)) return false; // local work wins
+// Merge remote area data into STATE. force=true skips the local-actuals guard (manual sync)
+function mergeRemoteArea(area, remoteProcs, force){
+  if(!force && areaHasLocalActuals(area)) return false;
   const procs=STATE.data[area]||{};
   for(const p in remoteProcs){
-    if(!procs[p]) continue; // only merge known processes
+    if(!procs[p]) continue;
     for(const key in remoteProcs[p]){
       if(!procs[p][key]) continue;
       const src=remoteProcs[p][key], dst=procs[p][key];
-      // Only overwrite fields that are null locally
-      if(dst.plan_u==null && src.plan_u!=null) dst.plan_u=src.plan_u;
-      if(dst.act_u==null  && src.act_u!=null)  dst.act_u=src.act_u;
-      if(dst.plan_f==null && src.plan_f!=null) dst.plan_f=src.plan_f;
-      if(dst.act_f==null  && src.act_f!=null)  dst.act_f=src.act_f;
-      if(dst.plan_hc==null && src.plan_hc!=null) dst.plan_hc=src.plan_hc;
-      if(dst.act_hc==null  && src.act_hc!=null)  dst.act_hc=src.act_hc;
-      if(dst.recirc==null  && src.recirc!=null)   dst.recirc=src.recirc;
-      if((!dst.note_u||dst.note_u==="") && src.note_u) dst.note_u=src.note_u;
+      if(force){
+        // Full overwrite — user explicitly checked this area
+        if(src.plan_u!=null) dst.plan_u=src.plan_u;
+        if(src.act_u!=null)  dst.act_u=src.act_u;
+        if(src.plan_f!=null) dst.plan_f=src.plan_f;
+        if(src.act_f!=null)  dst.act_f=src.act_f;
+        if(src.plan_hc!=null) dst.plan_hc=src.plan_hc;
+        if(src.act_hc!=null)  dst.act_hc=src.act_hc;
+        if(src.recirc!=null)  dst.recirc=src.recirc;
+        if(src.note_u) dst.note_u=src.note_u;
+      } else {
+        // Fill-only — only set fields that are null locally
+        if(dst.plan_u==null && src.plan_u!=null) dst.plan_u=src.plan_u;
+        if(dst.act_u==null  && src.act_u!=null)  dst.act_u=src.act_u;
+        if(dst.plan_f==null && src.plan_f!=null) dst.plan_f=src.plan_f;
+        if(dst.act_f==null  && src.act_f!=null)  dst.act_f=src.act_f;
+        if(dst.plan_hc==null && src.plan_hc!=null) dst.plan_hc=src.plan_hc;
+        if(dst.act_hc==null  && src.act_hc!=null)  dst.act_hc=src.act_hc;
+        if(dst.recirc==null  && src.recirc!=null)   dst.recirc=src.recirc;
+        if((!dst.note_u||dst.note_u==="") && src.note_u) dst.note_u=src.note_u;
+      }
     }
   }
   return true;
@@ -1693,7 +1705,7 @@ function showSyncModal(){
         let merged=0;
         for(const c of checks){
           if(!c.cb.checked) continue;
-          mergeRemoteArea(c.area, c.remoteProcs);
+          mergeRemoteArea(c.area, c.remoteProcs, true);
           merged++;
         }
         overlay.remove();
@@ -1911,7 +1923,6 @@ renderAll();
 applyShiftView(activeShift());
 document.getElementById("btnNavSync").onclick=function(){ showSyncModal(); };
 document.getElementById("btnNavPush").onclick=function(){ pushToJsonBin(current); toast("Pushing "+current+" to shared store…"); };
-autoSyncFromJsonBin();
 </script>
 </body>
 </html>
