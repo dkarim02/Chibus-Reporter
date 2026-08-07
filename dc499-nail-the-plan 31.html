@@ -125,6 +125,13 @@ h1,h2,h3{font-family:var(--disp);margin:0;font-weight:600}
 .navbtn.active{background:var(--graphite);color:#fff}
 .navbtn.active .navpct{color:#C6CCD3}
 .navbtn .navpct{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.navbtn .home-flag{display:none;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;margin-left:4px;font-size:11px;flex-shrink:0;border:none;background:transparent;color:var(--muted);padding:0;cursor:pointer;line-height:1;transition:color .12s,background .12s;}
+.navbtn:hover .home-flag{display:inline-flex;}
+.navbtn.is-home .home-flag{display:inline-flex;color:#7A4FA3;}
+.navbtn.active .home-flag{color:#C6CCD3;}
+.navbtn.active.is-home .home-flag{color:#B49FD4;}
+.home-flag:hover{background:rgba(122,79,163,.18)!important;color:#7A4FA3!important;}
+.sar-badge.is-home{background:#EDE7F6;color:#6A3FA0;}
 .main{padding:20px 24px 60px}
 .areahead{display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap}
 .clearbtn{font-size:12.5px;color:var(--behind);border-color:var(--line)}
@@ -217,8 +224,8 @@ input.f.shh{width:66px;padding:4px 7px;font-size:12px;text-align:right}
 .pphflag.make{background:var(--make-bg);color:var(--make)} .pphflag.behind{background:var(--behind-bg);color:var(--behind)}
 .cppph .glbl{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink)}
 /* ── Per-checkpoint hours bar (sits above each Mid/EOD card) ── */
-.cp-hrs-bar{display:flex;gap:10px;align-items:center;margin-bottom:5px;flex-wrap:wrap;}
-.cp-hrs-col{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
+.cp-hrs-bar{display:flex;gap:16px;align-items:center;margin-bottom:5px;flex-wrap:wrap;}
+.cp-hrs-col{display:flex;align-items:center;gap:6px;}
 .cp-hrs-lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
 .cp-hrs-lbl.ind{color:#7A4FA3;}
 .cp-hrs-bar .ind-hrs-pct{font-size:10px;}
@@ -251,6 +258,17 @@ body.dark .timer-chip.next{background:#1C2128;}
 
 /* ── Sync button in nav ── */
 .nav-bottom-block{margin-top:16px;padding-top:12px;border-top:1px solid var(--line-2);}
+/* ── What's new ── */
+.whats-new{margin-top:12px;padding-top:10px;border-top:1px solid var(--line-2);}
+.whats-new-toggle{width:100%;background:none;border:none;display:flex;align-items:center;justify-content:space-between;padding:4px 2px;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2);font-weight:600;}
+.whats-new-toggle:hover{color:var(--muted);}
+.whats-new-toggle .wn-arrow{font-size:9px;transition:transform .2s;}
+.whats-new-toggle.open .wn-arrow{transform:rotate(180deg);}
+.whats-new-list{display:none;margin:6px 0 0;padding:0;list-style:none;}
+.whats-new-list.open{display:block;}
+.whats-new-list li{font-family:var(--body);font-size:11.5px;color:var(--muted);padding:5px 2px 5px 10px;position:relative;line-height:1.4;border-bottom:1px solid var(--line-2);}
+.whats-new-list li:last-child{border-bottom:none;}
+.whats-new-list li::before{content:"·";position:absolute;left:0;color:var(--accent);font-size:14px;line-height:1.2;}
 .nav-sync-row{display:flex;gap:5px;margin-top:0;padding:0 8px 8px;}
 .nav-sync-btn{flex:1;text-align:left;background:none;border:1px solid var(--line);border-radius:7px;padding:7px 10px;display:flex;align-items:center;gap:7px;color:var(--accent-ink);font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;cursor:pointer;transition:background .15s;}
 .nav-sync-btn:hover{background:var(--make-bg);}
@@ -399,10 +417,6 @@ body.view-2nd .bshift.shift1{display:none}
           <span class="wh-label">Check Status</span>
           <input class="wh-input" id="whCheckStatus" placeholder="Paste check-status flow URL…" />
         </div>
-        <div class="wh-row">
-          <span class="wh-label">JSONBin Key</span>
-          <input class="wh-input" id="whJsonBin" placeholder="Paste JSONBin bin URL…" />
-        </div>
         <button class="btn primary wh-save" id="btnWhSave">Save webhooks</button>
       </div>
     </div>
@@ -426,7 +440,19 @@ body.view-2nd .bshift.shift1{display:none}
 </section>
 
 <div class="wrap">
-  <nav class="nav" id="nav"><div class="navlbl">Areas</div><div class="nav-bottom-block"><div class="nav-sync-row"><button class="nav-sync-btn" id="btnNavSync" title="Pull shared numbers from other departments"><span class="sync-dot"></span>Sync depts</button><button class="nav-push-btn" id="btnNavPush" title="Push this area's numbers to the shared store">Push</button></div><button class="late-btn" id="btnPostLate" style="display:none;margin:6px 8px 0;">&#9888; Post late</button><div class="block-timer" id="blockTimer"></div></div></nav>
+  <nav class="nav" id="nav"><div class="navlbl">Areas</div><div class="nav-bottom-block"><div class="nav-sync-row"><button class="nav-sync-btn" id="btnNavSync" title="Pull shared numbers from other departments"><span class="sync-dot"></span>Sync depts</button><button class="nav-push-btn" id="btnNavPush" title="Push this area's numbers to the shared store">Push</button></div><button class="late-btn" id="btnPostLate" style="display:none;margin:6px 8px 0;">&#9888; Post late</button><div class="block-timer" id="blockTimer"></div></div>
+<div class="whats-new">
+  <button class="whats-new-toggle" id="btnWhatsNew">What's new <span class="wn-arrow">&#9660;</span></button>
+  <ul class="whats-new-list" id="whatsNewList">
+    <li>Indirect hours field on each Mid-Day and EOD card</li>
+    <li>Three PPH scores — hover each label to see what it tracks</li>
+    <li>Countdown timer shows how long until the current window closes</li>
+    <li>Missed a posting window? Use Post Late to send with a reason</li>
+    <li>Push your numbers to a shared store so other depts can sync them</li>
+    <li>Sync depts — pull in other departments' latest numbers manually</li>
+  </ul>
+</div>
+</nav>
   <main class="main" id="main"></main>
 </div>
 
@@ -618,9 +644,24 @@ function renderNav(){
   const syncRow=nav.querySelector(".nav-bottom-block");
   for(const a of AREAS){
     const r=rollArea(a);
-    const b=el("button","navbtn"+(a===current?" active":""));
+    const isHome=STATE.meta.homeDept===a;
+    const b=el("button","navbtn"+(a===current?" active":"")+(isHome?" is-home":""));
+    const flag=document.createElement("button");
+    flag.className="home-flag"; flag.type="button";
+    flag.title=isHome?"Clear home dept (this dept is immune to sync)":"Set as home dept (immune to sync)";
+    flag.textContent="⚑";
+    flag.onclick=function(e){
+      e.stopPropagation();
+      STATE.meta.homeDept=(STATE.meta.homeDept===a)?null:a;
+      scheduleSave(); renderNav();
+      toast(STATE.meta.homeDept===a?"Home dept set to "+a+" — will never be overwritten by sync":"Home dept cleared");
+    };
     b.innerHTML=`<span class="dot ${r.cls}"></span>${a}<span class="navpct num">${pctTxt(r.pct)}</span>`;
-    b.onclick=()=>{current=a; STATE.meta.lastArea=a; scheduleSave(); renderNav(); renderMain();};
+    b.appendChild(flag);
+    b.onclick=function(e){
+      if(e.target===flag||flag.contains(e.target)) return;
+      current=a; STATE.meta.lastArea=a; scheduleSave(); renderNav(); renderMain();
+    };
     nav.insertBefore(b, syncRow);
   }
 }
@@ -1155,7 +1196,6 @@ function openWebhookMenu(){
   document.getElementById("whSubmit").value = STATE.meta.submitWebhook || "";
   document.getElementById("whSendReport").value = STATE.meta.sendReportWebhook || "";
   document.getElementById("whCheckStatus").value = STATE.meta.checkStatusWebhook || "";
-  document.getElementById("whJsonBin").value = STATE.meta.jsonBinUrl || "";
   document.getElementById("postMenu").classList.toggle("open");
 }
 function saveWebhooks(){
@@ -1165,7 +1205,6 @@ function saveWebhooks(){
   STATE.meta.submitWebhook = document.getElementById("whSubmit").value.trim();
   STATE.meta.sendReportWebhook = document.getElementById("whSendReport").value.trim();
   STATE.meta.checkStatusWebhook = document.getElementById("whCheckStatus").value.trim();
-  STATE.meta.jsonBinUrl = document.getElementById("whJsonBin").value.trim();
   document.getElementById("postMenu").classList.remove("open");
   save(true);
   toast("Webhooks saved");
@@ -1584,7 +1623,9 @@ function pushToJsonBin(area){
 }
 
 // Merge remote area data into STATE. force=true skips the local-actuals guard (manual sync)
+// Home dept is ALWAYS immune — never overwritten regardless of force flag
 function mergeRemoteArea(area, remoteProcs, force){
+  if(STATE.meta.homeDept===area) return false;
   if(!force && areaHasLocalActuals(area)) return false;
   const procs=STATE.data[area]||{};
   for(const p in remoteProcs){
@@ -1618,25 +1659,50 @@ function mergeRemoteArea(area, remoteProcs, force){
   return true;
 }
 
-// Auto-sync on page load — silent, merges only areas with no local actuals
-function autoSyncFromJsonBin(){
+// Auto-sync: silent pull that skips the home dept and any area with local actuals
+// Called from the timer tick when we're 0-10 mins past a block deadline
+function autoSyncFromJsonBin(blockKey){
   const url=STATE.meta.jsonBinUrl||"";
   if(!url) return;
+  // Mark this block as synced for today so the 10-min window only fires once
+  if(!STATE.meta.autoSyncedBlocks) STATE.meta.autoSyncedBlocks={};
+  STATE.meta.autoSyncedBlocks[blockKey]=STATE.meta.date;
+  save(true);
   fetch(url, {headers:{"X-Master-Key":JSONBIN_KEY,"X-Bin-Meta":"false"}})
     .then(function(r){ return r.ok?r.json():null; })
     .then(function(data){
       if(!data||typeof data!=="object") return;
-      // Only sync if date matches
       if(data._date && data._date!==STATE.meta.date) return;
       let changed=false;
       for(const a of AREAS){
-        if(data[a] && !areaHasLocalActuals(a)){
-          if(mergeRemoteArea(a,data[a])) changed=true;
+        if(data[a]){
+          if(mergeRemoteArea(a,data[a],true)) changed=true;
         }
       }
-      if(changed){ save(true); renderAll(); toast("Synced shared numbers"); }
+      if(changed){ save(true); renderAll(); toast("Auto-synced other depts' numbers"); }
     })
-    .catch(function(){}); // silent on failure
+    .catch(function(){});
+}
+
+// Check if any block just passed its deadline within the last 10 minutes and hasn't been auto-synced yet today
+function checkAutoSync(){
+  var pst=pstNow();
+  var cur=toMins(pst.getHours(),pst.getMinutes());
+  var curAdj=pst.getHours()<2?cur+24*60:cur;
+  if(!STATE.meta.autoSyncedBlocks) STATE.meta.autoSyncedBlocks={};
+  for(var i=0;i<BLOCKS.length;i++){
+    var b=BLOCKS[i];
+    var end=toMins(b.endH,b.endM);
+    var minsAfter=curAdj-end;
+    // Fire if we are 0–10 minutes past this block's deadline and haven't fired today
+    if(minsAfter>=0 && minsAfter<=10){
+      var lastSynced=STATE.meta.autoSyncedBlocks[b.key];
+      if(lastSynced!==STATE.meta.date){
+        autoSyncFromJsonBin(b.key);
+        return; // one block at a time
+      }
+    }
+  }
 }
 
 // Manual sync modal — shows checkboxes per area, warns if local data exists
@@ -1673,9 +1739,10 @@ function showSyncModal(){
 
       const dateMatch=data._date===STATE.meta.date;
       const note=document.createElement("div"); note.className="sync-note";
+      const homeLine=STATE.meta.homeDept?" Your home dept (⚑ "+STATE.meta.homeDept+") is always immune.":"";
       note.textContent=dateMatch
-        ? "Select which departments to pull in. Areas with a yellow badge have local data — syncing will only fill empty fields, your work is never overwritten."
-        : "Warning: shared data is from "+( data._date||"an unknown date")+", not today ("+STATE.meta.date+"). Proceed with caution.";
+        ? "Select which departments to pull in. Areas with a yellow badge have local data — syncing will only fill empty fields."+homeLine
+        : "Warning: shared data is from "+( data._date||"an unknown date")+", not today ("+STATE.meta.date+"). Proceed with caution."+homeLine;
       body.appendChild(note);
 
       const list=document.createElement("div"); list.className="sync-area-list";
@@ -1683,18 +1750,20 @@ function showSyncModal(){
       for(const a of AREAS){
         const hasRemote=!!(data[a] && Object.keys(data[a]).length>0);
         const hasLocal=areaHasLocalActuals(a);
+        const isHome=STATE.meta.homeDept===a;
         const row=document.createElement("label"); row.className="sync-area-row";
         const cb=document.createElement("input"); cb.type="checkbox"; cb.value=a;
-        cb.checked=hasRemote&&!hasLocal; // pre-check only if remote data exists and no local conflict
-        cb.disabled=!hasRemote;
+        cb.checked=hasRemote&&!hasLocal&&!isHome;
+        cb.disabled=!hasRemote||isHome;
         const name=document.createElement("span"); name.className="sar-name"; name.textContent=a;
         const badge=document.createElement("span"); badge.className="sar-badge";
-        if(!hasRemote){ badge.className+=" local-only"; badge.textContent="No remote data"; }
+        if(isHome){ badge.className+=" is-home"; badge.textContent="Home — immune"; }
+        else if(!hasRemote){ badge.className+=" local-only"; badge.textContent="No remote data"; }
         else if(hasLocal){ badge.className+=" has-local"; badge.textContent="Has local data"; }
         else { badge.className+=" has-remote"; badge.textContent="Ready to sync"; }
         row.appendChild(cb); row.appendChild(name); row.appendChild(badge);
         list.appendChild(row);
-        if(hasRemote) checks.push({cb,area:a,remoteProcs:data[a]});
+        if(hasRemote&&!isHome) checks.push({cb,area:a,remoteProcs:data[a]});
       }
       body.appendChild(list);
 
@@ -1880,9 +1949,10 @@ function buildLateCard(block, justification){
   return JSON.stringify({type:"AdaptiveCard","$schema":"http://adaptivecards.io/schemas/adaptive-card.json",version:"1.4",body:body});
 }
 
-// Kick off 1-minute timer tick
+// Kick off 1-minute timer tick; auto-sync check piggybacks on the same interval
 renderTimer();
-setInterval(renderTimer, 60000);
+checkAutoSync();
+setInterval(function(){ renderTimer(); checkAutoSync(); }, 60000);
 resetPersonHoursIfNewDay();
 STATE.meta.date=planDayISO();
 $("#planDate").value=STATE.meta.date;
@@ -1922,6 +1992,10 @@ applyDark(!!STATE.meta.darkMode);
 renderAll();
 applyShiftView(activeShift());
 document.getElementById("btnNavSync").onclick=function(){ showSyncModal(); };
+document.getElementById("btnWhatsNew").onclick=function(){
+  this.classList.toggle("open");
+  document.getElementById("whatsNewList").classList.toggle("open");
+};
 document.getElementById("btnNavPush").onclick=function(){ pushToJsonBin(current); toast("Pushing "+current+" to shared store…"); };
 </script>
 </body>
