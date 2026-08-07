@@ -550,8 +550,13 @@ function resetPersonHoursIfNewDay(){
   const today=planDayISO();
   if(STATE.meta.lastResetDate===today) return;
   for(const a in STATE.data) for(const p in STATE.data[a]) for(const key in STATE.data[a][p]){
-    const r=STATE.data[a][p][key]; r.totalHours=null; r.indirectHours=null;
+    const r=STATE.data[a][p][key];
+    r.plan_u=null; r.act_u=null; r.plan_f=null; r.act_f=null;
+    r.plan_hc=null; r.act_hc=null; r.plan_ind_hc=null; r.act_ind_hc=null;
+    r.recirc=null; r.shiftHours=null; r.totalHours=null; r.indirectHours=null; r.note_u="";
   }
+  STATE.notes={}; STATE.procNotes={};
+  STATE.meta.autoSyncedBlocks={};
   STATE.meta.lastResetDate=today;
 }
 let STATE=reconcile(load());
@@ -1594,10 +1599,15 @@ function buildAreaPayload(area){
     out[p]={};
     for(const key in procs[p]){
       const r=procs[p][key];
-      // Only include filled checkpoints
       if(r.plan_u!=null||r.act_u!=null||r.plan_f!=null||r.act_f!=null){
-        out[p][key]={plan_u:r.plan_u,act_u:r.act_u,plan_f:r.plan_f,act_f:r.act_f,
-          plan_hc:r.plan_hc,act_hc:r.act_hc,recirc:r.recirc,note_u:r.note_u||""};
+        out[p][key]={
+          plan_u:r.plan_u, act_u:r.act_u, plan_f:r.plan_f, act_f:r.act_f,
+          plan_hc:r.plan_hc, act_hc:r.act_hc,
+          plan_ind_hc:r.plan_ind_hc, act_ind_hc:r.act_ind_hc,
+          recirc:r.recirc, shiftHours:r.shiftHours,
+          totalHours:r.totalHours, indirectHours:r.indirectHours,
+          note_u:r.note_u||""
+        };
       }
     }
   }
@@ -1634,14 +1644,19 @@ function mergeRemoteArea(area, remoteProcs, force){
       if(!procs[p][key]) continue;
       const src=remoteProcs[p][key], dst=procs[p][key];
       if(force){
-        // Full overwrite — user explicitly checked this area
+        // Full overwrite — user explicitly checked this area in the sync modal
         if(src.plan_u!=null) dst.plan_u=src.plan_u;
         if(src.act_u!=null)  dst.act_u=src.act_u;
         if(src.plan_f!=null) dst.plan_f=src.plan_f;
         if(src.act_f!=null)  dst.act_f=src.act_f;
         if(src.plan_hc!=null) dst.plan_hc=src.plan_hc;
         if(src.act_hc!=null)  dst.act_hc=src.act_hc;
+        if(src.plan_ind_hc!=null) dst.plan_ind_hc=src.plan_ind_hc;
+        if(src.act_ind_hc!=null)  dst.act_ind_hc=src.act_ind_hc;
         if(src.recirc!=null)  dst.recirc=src.recirc;
+        if(src.shiftHours!=null) dst.shiftHours=src.shiftHours;
+        if(src.totalHours!=null) dst.totalHours=src.totalHours;
+        if(src.indirectHours!=null) dst.indirectHours=src.indirectHours;
         if(src.note_u) dst.note_u=src.note_u;
       } else {
         // Fill-only — only set fields that are null locally
@@ -1651,7 +1666,12 @@ function mergeRemoteArea(area, remoteProcs, force){
         if(dst.act_f==null  && src.act_f!=null)  dst.act_f=src.act_f;
         if(dst.plan_hc==null && src.plan_hc!=null) dst.plan_hc=src.plan_hc;
         if(dst.act_hc==null  && src.act_hc!=null)  dst.act_hc=src.act_hc;
+        if(dst.plan_ind_hc==null && src.plan_ind_hc!=null) dst.plan_ind_hc=src.plan_ind_hc;
+        if(dst.act_ind_hc==null  && src.act_ind_hc!=null)  dst.act_ind_hc=src.act_ind_hc;
         if(dst.recirc==null  && src.recirc!=null)   dst.recirc=src.recirc;
+        if(dst.shiftHours==null && src.shiftHours!=null) dst.shiftHours=src.shiftHours;
+        if(dst.totalHours==null && src.totalHours!=null) dst.totalHours=src.totalHours;
+        if(dst.indirectHours==null && src.indirectHours!=null) dst.indirectHours=src.indirectHours;
         if((!dst.note_u||dst.note_u==="") && src.note_u) dst.note_u=src.note_u;
       }
     }
@@ -1676,7 +1696,7 @@ function autoSyncFromJsonBin(blockKey){
       let changed=false;
       for(const a of AREAS){
         if(data[a]){
-          if(mergeRemoteArea(a,data[a],true)) changed=true;
+          if(mergeRemoteArea(a,data[a],false)) changed=true;
         }
       }
       if(changed){ save(true); renderAll(); toast("Auto-synced other depts' numbers"); }
