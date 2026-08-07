@@ -118,16 +118,13 @@ SEED data (historical example entries) is the fallback default — loaded when l
 
 ---
 
-## File versioning
+## File structure
 
-- Working file: `dc499-nail-the-plan 31.html` (versioned copy, used for development)
-- `index.html` = always a copy of the latest versioned file (for GitHub Pages)
-- When pushing a new version: copy versioned file → index.html, commit both, push
+- `index.html` — the entire app, single canonical file. Edit this directly.
+- `README.md` — public-facing feature list and usage notes
+- `CLAUDE.md` — this file
 
-**Version bump locations (3 places):**
-1. HTML `<title>` tag
-2. Any footer/settings version text
-3. Versioned filename itself (e.g. 31 → 32)
+No versioned copies. `index.html` is what GitHub Pages serves at `dkarim02.github.io/Nail-the-Plan`.
 
 ---
 
